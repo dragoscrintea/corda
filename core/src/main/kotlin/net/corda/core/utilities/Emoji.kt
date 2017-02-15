@@ -16,6 +16,8 @@ object Emoji {
     const val CODE_GREEN_TICK = "\u2705"
     const val CODE_PAPERCLIP = "\ud83d\udcce"
     const val CODE_COOL_GUY = "\ud83d\ude0e"
+    @JvmStatic val CODE_NO_ENTRY = String(Character.toChars(128683))
+    @JvmStatic val SKULL_AND_CROSSBONES = String(Character.toChars(9760))
 
     /**
      * When non-null, toString() methods are allowed to use emoji in the output as we're going to render them to a

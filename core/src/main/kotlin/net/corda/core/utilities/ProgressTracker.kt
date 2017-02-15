@@ -55,7 +55,7 @@ class ProgressTracker(vararg steps: Step) {
 
     /** This class makes it easier to relabel a step on the fly, to provide transient information. */
     open inner class RelabelableStep(currentLabel: String) : Step(currentLabel) {
-        override val changes = BehaviorSubject.create<Change>()
+        override val changes: BehaviorSubject<Change> = BehaviorSubject.create()
 
         var currentLabel: String = currentLabel
             set(value) {
@@ -122,7 +122,7 @@ class ProgressTracker(vararg steps: Step) {
                 curChangeSubscription?.unsubscribe()
                 stepIndex = index
                 _changes.onNext(Change.Position(this, steps[index]))
-                curChangeSubscription = currentStep.changes.subscribe { _changes.onNext(it) }
+                curChangeSubscription = currentStep.changes.subscribe( { _changes.onNext(it) }, { _changes.onError(it) })
 
                 if (currentStep == DONE) _changes.onCompleted()
             }
@@ -148,6 +148,8 @@ class ProgressTracker(vararg steps: Step) {
         }
         _changes.onNext(Change.Structural(this, step))
     }
+
+    fun endWithError(error: Throwable) = _changes.onError(error)
 
     /** The parent of this tracker: set automatically by the parent when a tracker is added as a child */
     var parent: ProgressTracker? = null
@@ -195,6 +197,8 @@ class ProgressTracker(vararg steps: Step) {
      * if a step changed its label or rendering).
      */
     val changes: Observable<Change> get() = _changes
+
+    val hasEnded: Boolean get() = _changes.hasCompleted() || _changes.hasThrowable()
 }
 
 
